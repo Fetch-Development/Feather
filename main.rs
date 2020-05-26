@@ -114,7 +114,6 @@ fn main(){
 			for j in 0..ROOTS.len() - 1{
 				if colors_collection[j][block] > maxval {maxval = colors_collection[j][block]; maxindexes[block] = j;}
 			}
-			//rintln!("In block {} it's {}", block, ROOTS[maxindexes[block]]);
 		}
 	}
 	println!("Done");
