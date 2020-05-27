@@ -10,6 +10,10 @@ Usage:
     -h, --help       Prints help information
     
     -V, --version    Prints version information
+    
+    -a, --analyze    Analyzing the text of an e-book
+
+    -i, --image      Create a picture, which represent dominant colors mentioned in an e-book
 
 ARGS:
     
