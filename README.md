@@ -1,5 +1,5 @@
 # Feather
-Creates images, demonstrating dominant colors out of e-books
+Creates images, demonstrating dominant colors out of e-books, analyzes text of an e-book.
 
 Usage:
 
