@@ -19,6 +19,9 @@ use std::io::BufReader;
 use progress_bar::progress_bar::ProgressBar;
 use progress_bar::color::{Color, Style};
 use std::iter::FromIterator;
+extern crate colorful;
+use colorful::Color as TermColor;
+use colorful::Colorful;
 
 mod blocks;
 
@@ -47,7 +50,7 @@ fn main(){
 	const ROOTS: [&str; 20] = ["черн", "бел", "голуб", "син", "красн", "желт", "зелен", "оранжев", "фиолетов", "розов", "бирюзов", "бордов", "салатов",
 	"коричнев", "лилов", "сер", "кар", "сиз", "вишнев", "огненн"];
 	const TAILS: [&str; 20] = ["ый", "ый", "ой", "ий", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ый", "ий", "ый", "ый", "ый"];
-	const COMMON: [&str; 197] = ["–", "-", "меня", "мне", "был", "было","были", "была", "ты", "чтобы", "я","он", "она", "они", "оно", "его", "ее", "её",
+	const COMMON: [&str; 201] = ["–", "-", "меня", "мне", "был", "было","были", "была", "ты", "чтобы", "я","он", "она", "они", "оно", "его", "ее", "её",
 	 "наш", "их", "мой", "и", "но","не", "на", "в", "под", "над", "из", "от", "что", "это", "все" , "как", "с", "у", "к", "а", "за", "мы", "нас", "по",
 	 "когда", "о", "так", "бы", "же", "для", "или", "если", "еще", "со", "с", "очень", "до", "то", "ни", "ему", "чем", "только", "уже", "даже", "во",
 	 "этого","тебя","сказал","тебе","после","я,","где","них","этом","этот","него","себя","время","и,","вы","через","надо","нам", "несколько","меня",
@@ -56,10 +59,11 @@ fn main(){
 	 "знал","всего","почти","своей","кто","рядом","ей","между","перед","знаю","слишком","моей","нет","себе","вот","нее","свои","хотя","хорошо","два",
 	 "такой","много","тогда","всем","этим","более","мои","мое","никогда","хотел","почему","что-то","эту","словно","свой","могу","ними","своих","нами",
 	 "также","которых","нем","сейчас","поэтому","будто","лишь","сказала","сейчас","опять","сам","спросил","тому","немного","спросила","куда","однако",
-	 "ну", "да", "нет", "вдруг","ведь","уж","вам","вас","совсем","впрочем","тотчас","про","хоть","ж","чтоб","точно","кажется"];
+	 "ну", "да", "нет", "вдруг","ведь","уж","вам","вас","совсем","впрочем","тотчас","про","хоть","ж","чтоб","точно","кажется", "какой", "такое", "другой",
+	 "которое"];
 
 	let matches = App::new("feather")
-	.version("2.0")
+	.version("2.1")
 	.about("Creates images, demonstrating dominant colors out of e-books.")
 	.author("Aydar N.")
 		.arg(Arg::with_name("INPUT")
@@ -78,14 +82,22 @@ fn main(){
 
 	
 	let val = matches.value_of("INPUT").unwrap();
-	println!("Opening {}...", val);
+	println!("{} {}...", "Opening ".color(TermColor::Cyan).bold(), val);
 	let file = File::open(val).expect("file not found");
-	println!("Counting words...");
+	println!("{}words...", "Counting ".color(TermColor::Cyan).bold());
 	let reader = BufReader::new(&file);
 	let words_temp = reader.split(b' ').map(|l| l.unwrap());
 	let mut words_encoded = Vec::new();
+	let mut sentences = 0;
+	let mut length_offset = 0;
+	let mut longest = "".to_string();
+	let mut buf = "".to_string();
+	let mut longest_len = 0;
+	let mut up_to_append = false;
 	for word in words_temp{
 		let encoded = WINDOWS_1251.decode(&word, DecoderTrap::Strict).unwrap();
+		if encoded.contains(".") || encoded.contains("!") || encoded.contains("?") { if up_to_append{write!(longest, "{}", encoded).unwrap(); longest_len += 1; up_to_append = false} sentences += 1; length_offset = 0; buf = "".to_string()}
+		else{length_offset += 1; write!(buf, "{} ", encoded).unwrap(); if length_offset > longest_len { longest = buf.clone(); longest_len += 1; up_to_append = true }}
 		words_encoded.push(encoded.to_lowercase().replace(".", "").replace(",", "").replace(":", "").replace("\u{a0}–", "").replace("\u{a0}", " "));
 	}
 	let words_count = words_encoded.len();
@@ -109,7 +121,7 @@ fn main(){
 			}
 		}
 		println!();
-		println!("Eliminating orphaned color blocks...");
+		println!("{}orphaned color blocks...", "Eliminating ".color(TermColor::Cyan).bold());
 
 		let mut orphaned : [bool; 64] = [true; 64];
 		for block in 0..64{
@@ -127,9 +139,8 @@ fn main(){
 				orphaned_count = orphaned_count + 1;
 			}
 		}
-
-		println!("{} eliminated", orphaned_count);
-		println!("Calculating dominant colors for each block...");
+		println!("{}", "Done".color(TermColor::Green).bold());
+		println!("{}dominant colors for each block...", "Calculating ".color(TermColor::Cyan).bold());
 		let mut maxindexes = [0; 64];
 		let mut saturations: [u8; 64]=[0; 64];
 		for block in 0..64{
@@ -150,8 +161,8 @@ fn main(){
 				//println!("In block {} it's {}, with saturation {}", block, ROOTS[maxindexes[block]], saturations[block]);
 			}
 		}
-		println!("Done");
-		println!("Generating color values for each block...");
+		println!("{}", "Done".color(TermColor::Green).bold());
+		println!("{}color values for each block...", "Generating ".color(TermColor::Cyan).bold());
 		let mut rblocks: [u8; 64] = [50; 64];
 		let mut gblocks: [u8; 64] = [50; 64];
 		let mut bblocks: [u8; 64] = [50; 64]; 
@@ -182,14 +193,15 @@ fn main(){
 			}
 		}
 
-		println!("Done");
-		println!("Generating image...");
+		println!("{}", "Done".color(TermColor::Green).bold());
+		println!("{}image...", "Generating ".color(TermColor::Cyan).bold());
 		blocks::set_blocks(rblocks, gblocks, bblocks);
-		println!("Done");
+		println!("{}", "Done".color(TermColor::Green).bold());
 	} else if matches.is_present("analyze"){
 		println!("{} in total", words_count);
+		println!("Total sentences: {}, the longest seems to be this:", sentences);
+		println!("{:?}", longest);
 		println!("Looking for most common used words...");
-
 		let mut progress_bar = ProgressBar::new(words_encoded.len());
 		progress_bar.set_action("Analyzing", Color::Cyan, Style::Bold);
 		let mut counts = BTreeMap::new();
