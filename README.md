@@ -7,19 +7,16 @@ Usage:
     
     FLAGS:
     
+    -b, --bot        Format output for usage with bot
     -h, --help       Prints help information
-    
     -V, --version    Prints version information
-    
     -a, --analyze    Analyzing the text of an e-book
-
     -i, --image      Create a picture, which represent dominant colors mentioned in an e-book
 
 ARGS:
     
     <INPUT>    Sets path to the e-book file
 
-
-Mind that only .txt files with Russian text and total word count over 10000 are supported.
+Mind that only .txt CP1251-encoded files with Russian text and total word count over 10000 are supported.
 
 It's recommended to remove prefaces and epilogues for better visualization.
