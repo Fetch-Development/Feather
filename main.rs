@@ -63,7 +63,7 @@ fn main(){
 	 "которое"];
 
 	let matches = App::new("feather")
-	.version("2.1")
+	.version("2.2")
 	.about("Creates images, demonstrating dominant colors out of e-books.")
 	.author("Aydar N.")
 		.arg(Arg::with_name("INPUT")
@@ -78,13 +78,19 @@ fn main(){
 		.short("i")
 		.long("image")
 		.help("Create a picture, which represent dominant colors mentioned in an e-book"))
+	.arg(Arg::with_name("bot output")
+		.short("b")
+		.long("bot")
+		.help("Format output for usage with bot"))
 	.get_matches();
 
+	let mut b = false;
+	if matches.is_present("bot output"){b = true};
 	
 	let val = matches.value_of("INPUT").unwrap();
-	println!("{} {}...", "Opening ".color(TermColor::Cyan).bold(), val);
-	let file = File::open(val).expect("file not found");
-	println!("{}words...", "Counting ".color(TermColor::Cyan).bold());
+	if !b { println!("{} {}...", "Opening ".color(TermColor::Cyan).bold(), val)}
+	let file = File::open(val).expect("ERR: File not found");
+	if !b { println!("{}words...", "Counting ".color(TermColor::Cyan).bold())}
 	let reader = BufReader::new(&file);
 	let words_temp = reader.split(b' ').map(|l| l.unwrap());
 	let mut words_encoded = Vec::new();
@@ -96,7 +102,7 @@ fn main(){
 	let mut up_to_append = false;
 	for word in words_temp{
 		let encoded = WINDOWS_1251.decode(&word, DecoderTrap::Strict).unwrap();
-		if encoded.contains(".") || encoded.contains("!") || encoded.contains("?") { if up_to_append{write!(longest, "{}", encoded).unwrap(); longest_len += 1; up_to_append = false} sentences += 1; length_offset = 0; buf = "".to_string()}
+		if encoded.contains(".") || encoded.contains("!") || encoded.contains("?") { if up_to_append{write!(longest, "{}...", encoded.replace("\r\n", " ")).unwrap(); longest_len += 1; up_to_append = false} sentences += 1; length_offset = 0; buf = "".to_string()}
 		else{length_offset += 1; write!(buf, "{} ", encoded).unwrap(); if length_offset > longest_len { longest = buf.clone(); longest_len += 1; up_to_append = true }}
 		words_encoded.push(encoded.to_lowercase().replace(".", "").replace(",", "").replace(":", "").replace("\u{a0}–", "").replace("\u{a0}", " "));
 	}
@@ -104,12 +110,12 @@ fn main(){
 	if words_count < 10000 { panic!("Not enough words to analyze"); }
 	let words_in_block = words_count / 64;
 	if matches.is_present("image") {
-		println!("{}, thus {} words will be analyzed in a single block.", words_count, words_in_block);
-		println!("Analyzing blocks of text for color matches...");
+		if !b {println!("{}, thus {} words will be analyzed in a single block.", words_count, words_in_block)}
+		if !b {println!("{}blocks of text for color matches...", "Analyzing ".color(TermColor::Cyan).bold())}
 		let mut progress_bar = ProgressBar::new(64);
-		progress_bar.set_action("Analyzing", Color::Cyan, Style::Bold);
+		if !b {progress_bar.set_action("Analyzing", Color::Cyan, Style::Bold)}
 		for i in 1..65 {
-			progress_bar.inc();
+			if !b{progress_bar.inc()}
 			for j in 0..ROOTS.len() - 1{
 				let mut occurrences = 0;
 				for k in i * words_in_block - words_in_block .. i * words_in_block{
@@ -120,8 +126,8 @@ fn main(){
 				colors_collection[j][i - 1] = occurrences;
 			}
 		}
-		println!();
-		println!("{}orphaned color blocks...", "Eliminating ".color(TermColor::Cyan).bold());
+		if !b {println!()}
+		if !b {println!("{}orphaned color blocks...", "Eliminating ".color(TermColor::Cyan).bold())}
 
 		let mut orphaned : [bool; 64] = [true; 64];
 		for block in 0..64{
@@ -139,8 +145,8 @@ fn main(){
 				orphaned_count = orphaned_count + 1;
 			}
 		}
-		println!("{}", "Done".color(TermColor::Green).bold());
-		println!("{}dominant colors for each block...", "Calculating ".color(TermColor::Cyan).bold());
+		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
+		if !b {println!("{}dominant colors for each block...", "Calculating ".color(TermColor::Cyan).bold())}
 		let mut maxindexes = [0; 64];
 		let mut saturations: [u8; 64]=[0; 64];
 		for block in 0..64{
@@ -158,11 +164,11 @@ fn main(){
 						
 					}
 				}
-				//println!("In block {} it's {}, with saturation {}", block, ROOTS[maxindexes[block]], saturations[block]);
+				//if !b { println!("In block {} it's {}, with saturation {}", block, ROOTS[maxindexes[block]], saturations[block]);
 			}
 		}
-		println!("{}", "Done".color(TermColor::Green).bold());
-		println!("{}color values for each block...", "Generating ".color(TermColor::Cyan).bold());
+		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
+		if !b {println!("{}color values for each block...", "Generating ".color(TermColor::Cyan).bold())}
 		let mut rblocks: [u8; 64] = [50; 64];
 		let mut gblocks: [u8; 64] = [50; 64];
 		let mut bblocks: [u8; 64] = [50; 64]; 
@@ -193,23 +199,26 @@ fn main(){
 			}
 		}
 
-		println!("{}", "Done".color(TermColor::Green).bold());
-		println!("{}image...", "Generating ".color(TermColor::Cyan).bold());
-		blocks::set_blocks(rblocks, gblocks, bblocks);
-		println!("{}", "Done".color(TermColor::Green).bold());
+		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
+		if !b {println!("{}image...", "Generating ".color(TermColor::Cyan).bold())}
+		blocks::set_blocks(rblocks, gblocks, bblocks, words_count);
+		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
+		else {
+			println!("feather_out_{}.png", words_count);
+		}
 	} else if matches.is_present("analyze"){
-		println!("{} in total", words_count);
-		println!("Total sentences: {}, the longest seems to be this:", sentences);
+		println!("{} words in total", words_count);
+		println!("{} sentences, the longest seems to be this:", sentences);
 		println!("{:?}", longest);
-		println!("Looking for most common used words...");
+		if !b {println!("Looking for most common used words...")}
 		let mut progress_bar = ProgressBar::new(words_encoded.len());
-		progress_bar.set_action("Analyzing", Color::Cyan, Style::Bold);
+		if !b {progress_bar.set_action("Analyzing", Color::Cyan, Style::Bold)}
 		let mut counts = BTreeMap::new();
 		for word in words_encoded{
-			progress_bar.inc();
+			if !b{progress_bar.inc()}
 			*counts.entry(word).or_insert(0) += 1;
 		}
-		println!();
+		if !b {println!()}
 		for i in 0..COMMON.len() {
 			counts.remove(COMMON[i]);
 		}
