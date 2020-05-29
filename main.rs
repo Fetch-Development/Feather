@@ -65,13 +65,17 @@ fn main(){
 	 "которое"];
 
 	let matches = App::new("feather")
-	.version("2.2.2")
+	.version("2.3")
 	.about("Creates images, demonstrating dominant colors out of e-books.")
 	.author("Aydar N.")
-		.arg(Arg::with_name("INPUT")
+	.arg(Arg::with_name("INPUT")
 		.help("Sets path to the e-book file")
 		.required(true)
 		.index(1))
+	.arg(Arg::with_name("NAME")
+		.help("Sets output file name")
+		.required(true)
+		.index(2))
 	.arg(Arg::with_name("analyze")
 		.short("a")
 		.long("analyze")
@@ -89,6 +93,7 @@ fn main(){
 	let mut b = false;
 	if matches.is_present("bot output"){b = true};
 	let val = matches.value_of("INPUT").unwrap();
+	let fname = matches.value_of("NAME").unwrap();
 	if !b { println!("{} {}...", "Opening ".color(TermColor::Cyan).bold(), val)}
 	let file = File::open(val).expect("ERR: File not found");
 	if !b { println!("{}words...", "Counting ".color(TermColor::Cyan).bold())}
@@ -202,7 +207,7 @@ fn main(){
 
 		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
 		if !b {println!("{}image...", "Generating ".color(TermColor::Cyan).bold())}
-		let out = blocks::set_blocks(rblocks, gblocks, bblocks, words_count);
+		let out = blocks::set_blocks(rblocks, gblocks, bblocks, words_count, fname.to_string().replace("_", " "));
 		if !b {println!("{}", "Done".color(TermColor::Green).bold())}
 		else {
 			println!("{}", out);
