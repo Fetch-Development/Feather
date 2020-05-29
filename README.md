@@ -3,7 +3,7 @@ Creates images, demonstrating dominant colors out of e-books, analyzes text of a
 
 Usage:
 
-    feather <INPUT>
+    feather [FLAGS] <INPUT> <NAME>
     
     FLAGS:
     
@@ -16,6 +16,7 @@ Usage:
 ARGS:
     
     <INPUT>    Sets path to the e-book file
+    <NAME>     Sets output file name
 
 Mind that only .txt CP1251-encoded files with Russian text and total word count over 10000 are supported.
 
