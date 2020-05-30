@@ -22,5 +22,5 @@ Mind that only .txt CP1251-encoded files with Russian text and total word count 
 
 It's recommended to remove prefaces and epilogues for better visualization.
 
-#Output example:
+# Output example:
 ![alt text](https://github.com/Fetch-Development/Feather/blob/master/Examples/IMAGE%202020-05-30%2013:56:01.jpg)
