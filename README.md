@@ -17,6 +17,10 @@ ARGS:
     
     <INPUT>    Sets path to the e-book file
     <NAME>     Sets output file name
+    
+Example command:
+
+    ./feather -i /Users/lesterrry/Downloads/Roberts_G._Shantaram2._Ten_Goryi.txt Шантарам
 
 Mind that only .txt CP1251-encoded files with Russian text and total word count over 10000 are supported.
 
