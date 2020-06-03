@@ -1,5 +1,6 @@
 # Feather
 Creates images, demonstrating dominant colors out of e-books, analyzes text of an e-book.
+
 [Latest release](https://github.com/Fetch-Development/Feather/releases/latest)
 
 Usage:
